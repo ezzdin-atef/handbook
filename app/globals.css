@@ -33,7 +33,7 @@
   --code-border: transparent;
   --shadow-float: 0 24px 64px rgba(9, 9, 11, 0.25);
 
-  --font-sans: var(--font-inter), Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans: var(--font-inter), Inter, var(--font-arabic), "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: var(--font-jetbrains), "JetBrains Mono", ui-monospace, monospace;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -934,7 +934,7 @@ pre,
 .prose ul,
 .prose ol {
   margin: 0 0 16px;
-  padding-left: 22px;
+  padding-inline-start: 22px;
 }
 .prose li + li {
   margin-top: 4px;
@@ -950,6 +950,9 @@ pre,
   margin-bottom: 0;
 }
 .prose :not(pre) > code {
+  /* Keep code chips as one LTR unit inside Arabic sentences. */
+  unicode-bidi: isolate;
+  direction: ltr;
   font-size: 14px;
   background: var(--bg-muted);
   padding: 2px 6px;
@@ -974,6 +977,51 @@ pre,
 .prose figure[data-rehype-pretty-code-figure] {
   margin: 0;
 }
+/* Code stays LTR; isolating each token stops Arabic in comments and strings
+   from reordering the code around it. */
+.prose pre {
+  direction: ltr;
+  text-align: left;
+}
+.prose pre [data-line] > span {
+  unicode-bidi: isolate;
+}
+
+/* ---------- Right-to-left text ----------
+   Blocks get dir="auto" from the Markdown renderer. Arabic glyphs sit visually
+   smaller than Latin at the same size, so RTL blocks get a small bump and more
+   room between lines, and never use the negative tracking Latin headings have
+   (it breaks Arabic letter joins). */
+.prose [dir="rtl"] {
+  line-height: 1.9;
+}
+.prose p[dir="rtl"],
+.prose [dir="rtl"] :is(li, td, th) {
+  font-size: 17px;
+}
+.prose :is(h1, h2, h3, h4)[dir="rtl"] {
+  letter-spacing: 0;
+  line-height: 1.5;
+}
+/* Titles and summaries anywhere in the UI take their direction from their own
+   first letter, so an Arabic title isn't reordered by the LTR page around it. */
+.note-title,
+.page-title,
+.card__title,
+.card__desc,
+.note-row__title,
+.note-row__summary,
+.recent-row__title,
+.table__title,
+.change-row__title,
+.prev-next__title,
+.result__title,
+.rail-link {
+  unicode-bidi: plaintext;
+}
+.note-title {
+  text-align: start;
+}
 .prose hr {
   border: 0;
   border-top: 1px solid var(--border);
@@ -996,7 +1044,7 @@ pre,
 .prose td {
   border: 1px solid var(--border);
   padding: 8px 12px;
-  text-align: left;
+  text-align: start;
 }
 .prose th {
   background: var(--bg-subtle);

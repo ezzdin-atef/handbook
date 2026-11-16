@@ -31,7 +31,39 @@ type Options = {
   stripLeadingH1?: boolean;
 };
 
-/** "rust/ownership.md" -> "rust/ownership"; "rust/README.md" -> "rust". */
+/**
+ * Blocks that get an explicit `dir`. Code blocks (`pre`) are deliberately left LTR.
+ * `li` is left out so a whole list shares one direction (from the list's text) and
+ * its numbers or bullets stay on one side.
+ */
+const DIR_BLOCKS = new Set(["p", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol", "blockquote", "table"]);
+
+const RTL_LETTER = /[֐-ࣿיִ-﷿ﹰ-﻿]/gu;
+const LTR_LETTER = /[A-Za-zÀ-ɏ]/g;
+
+/** Letters of a block's text, skipping inline code (always LTR, so it shouldn't vote). */
+function proseText(node: Element | HastRoot): string {
+  let out = "";
+  for (const child of node.children) {
+    if (child.type === "text") out += child.value;
+    else if (child.type === "element" && child.tagName !== "code") out += proseText(child);
+  }
+  return out;
+}
+
+/**
+ * Direction by majority script rather than the first letter (what `dir="auto"`
+ * does). Mixed Arabic/English notes often start an Arabic sentence with an English
+ * term ("**Ownership** = الكتاب بتاعك"), which `auto` would wrongly render LTR.
+ */
+function blockDir(node: Element): "rtl" | "ltr" {
+  const text = proseText(node);
+  const rtl = text.match(RTL_LETTER)?.length ?? 0;
+  const ltr = text.match(LTR_LETTER)?.length ?? 0;
+  return rtl > ltr ? "rtl" : "ltr";
+}
+
+/** "rust/ownership.md" -> "rust/ownership";"rust/README.md" -> "rust". */
 export function fileToSlug(relPath: string): string {
   const noExt = relPath.replace(/\\/g, "/").replace(/\.md$/i, "");
   if (/(^|\/)README$/i.test(noExt)) return noExt.replace(/\/?README$/i, "");
@@ -69,6 +101,9 @@ export async function renderMarkdown(source: string, opts: Options): Promise<Ren
 
   const rehypeCollect = () => (tree: HastRoot) => {
     visit(tree, "element", (node: Element) => {
+      if (DIR_BLOCKS.has(node.tagName)) {
+        node.properties = { ...node.properties, dir: blockDir(node) };
+      }
       if (node.tagName === "h2" || node.tagName === "h3") {
         const id = String(node.properties?.id ?? "");
         if (id) headings.push({ depth: node.tagName === "h2" ? 2 : 3, text: hastToString(node), id });

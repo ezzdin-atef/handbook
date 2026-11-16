@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { prefsScript } from "@/lib/theme";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, IBM_Plex_Sans_Arabic, JetBrains_Mono } from "next/font/google";
 import { site } from "@/site.config";
 import { getSite, type Folder } from "@/lib/content";
 import type { Tree, TreeFolder } from "@/lib/tree";
@@ -10,7 +10,24 @@ import { SearchDialog } from "@/components/SearchDialog";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-inter" });
+// Arabic text: IBM Plex Sans Arabic is drawn to sit well beside Inter.
+const arabic = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500", "600", "700"], variable: "--font-arabic" });
+
+/**
+ * Each next/font family comes as "'Real', 'Real Fallback'", where the fallback is
+ * local Arial. Arial has Arabic glyphs, so `Inter, Inter Fallback, Plex Arabic`
+ * would draw Arabic in Arial. Put both real fonts first, then the fallbacks.
+ */
+const families = (f: { style: { fontFamily: string } }) => f.style.fontFamily.split(",").map((s) => s.trim());
+const [interMain, ...interFallback] = families(inter);
+const [arabicMain, ...arabicFallback] = families(arabic);
+const fontSans = [interMain, arabicMain, ...interFallback, ...arabicFallback, "system-ui", "sans-serif"].join(", ");
 const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-jetbrains" });
+// Same problem in code: JetBrains Mono's fallback is Arial scaled up 134% to match
+// mono widths, so Arabic comments came out in oversized Arial. There is no good
+// Arabic monospace, so Arabic in code uses Plex Arabic like the prose does.
+const [monoMain, ...monoFallback] = families(mono);
+const fontMono = [monoMain, arabicMain, ...monoFallback, "ui-monospace", "monospace"].join(", ");
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -40,7 +57,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const tree: Tree = { folders: data.root.folders.map(toTree), total: data.notes.length };
 
   return (
-    <html lang="en" className={`${inter.variable} ${mono.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${inter.variable} ${arabic.variable} ${mono.variable}`}
+      style={{ "--font-sans": fontSans, "--font-mono": fontMono } as React.CSSProperties}
+      suppressHydrationWarning
+    >
       <head>
         {/* Applies saved theme + accent before first paint. Must stay a plain inline
             script: next/script queues it until hydration, which causes a flash.
