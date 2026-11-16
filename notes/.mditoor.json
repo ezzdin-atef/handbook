@@ -1,0 +1,47 @@
+{
+  "metadataFields": [
+    {
+      "id": "note-title",
+      "name": "title",
+      "required": true,
+      "type": "text"
+    },
+    {
+      "id": "note-tags",
+      "name": "tags",
+      "required": false,
+      "type": "tags"
+    },
+    {
+      "id": "note-created",
+      "name": "created",
+      "required": false,
+      "type": "date"
+    },
+    {
+      "id": "63b95e71-1a0c-45cb-baf1-00e14cf4b4a0",
+      "name": "summary",
+      "required": false,
+      "type": "text"
+    },
+    {
+      "id": "3626aa45-5aa9-44ff-a39a-2410be34113c",
+      "name": "start_here",
+      "required": false,
+      "type": "boolean"
+    }
+  ],
+  "profile": {
+    "extension": ".md",
+    "framework": "generic",
+    "frontmatter": "yaml",
+    "layout": "tree"
+  },
+  "storageEncrypted": {
+    "alg": "HMAC-SHA256-STREAM",
+    "ciphertext": "508c236c74be1473741e1a0e4e8ce2fadb29cde0bc382ba33bab19c4981ea5c7b97bda646629f14ed19b5d80d6703fc04947fed3014e463ba855379760297574c5034231290944c27df7fa37634251f00c2904c7d5a02328f8c78e15576bc99e6b9b1f81f392da093a0e94cbe85711b419314a674b0abb99d69ce0d0a3291bb698870c89ab4cf6fdca85d11612246ae5776c75cee075df16ced7e9ac87bddd3dbdda0cdf304657ae2d62193f0a23109b7e341ff95b23bf6a484c09ae920e1a93b1ae0c4a2a90dd79d66e8fe29eb2c0059933c5914b45bec38ab01ac70323e5bc0b5eccd3e71c0b15acd3dadbadc867a8512cc78276dfdb031a4ae045a26d77692f225b07328cf62f10da398128555a3cbca531609fd354a14627118cccbba99b868490e0",
+    "mac": "892335ecf5d8608767cb16cb83087a2022cc698451de6907a461e7bf9efd3968",
+    "nonce": "49a6a55455c3c9e5f5ac11014e80f128",
+    "v": 1
+  }
+}
